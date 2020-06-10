@@ -8,12 +8,13 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
-@Order(1)
+@EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -36,11 +37,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
-        http.csrf()
+
+        http.anonymous().disable().authorizeRequests()
+                .antMatchers("/**").permitAll()
+//                .antMatchers("/**/public/**").permitAll()
+//                .antMatchers("/public/**").permitAll()
+                .anyRequest().authenticated()
                 .and()
-                .cors().disable()
-                .authorizeRequests()
-                .antMatchers("/**/public/**").permitAll()
-                .anyRequest().authenticated();
+                .csrf().disable();
     }
 }

@@ -66,20 +66,21 @@ public class OAuth2AuthorizationServer extends AuthorizationServerConfigurerAdap
 	@Override
 	public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
 		security
-			.tokenKeyAccess("permitAll()")
-			.checkTokenAccess("isAuthenticated()");
+				.tokenKeyAccess("permitAll()")
+				.checkTokenAccess("isAuthenticated()");
 	}
 
 	@Override
 	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 		clients
-			.inMemory()
-			.withClient(clientId)
-			.secret(passwordEncoder.encode(clientSecret))
-			.authorizedGrantTypes(grantTypes)
-			.scopes(scopes)
-			.accessTokenValiditySeconds(accessTokenExpireTime)
-			.refreshTokenValiditySeconds(refreshTokenExpireTime);
+				.inMemory()
+				.withClient(clientId)
+				.secret(passwordEncoder.encode(clientSecret))
+				.authorizedGrantTypes(grantTypes)
+				.resourceIds(clientId)
+				.scopes(scopes)
+				.accessTokenValiditySeconds(accessTokenExpireTime)
+				.refreshTokenValiditySeconds(refreshTokenExpireTime);
 	}
 
 	@Bean
@@ -95,6 +96,7 @@ public class OAuth2AuthorizationServer extends AuthorizationServerConfigurerAdap
 	public void configure(final AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 		final TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
 		tokenEnhancerChain.setTokenEnhancers(Arrays.asList(tokenEnhancer(), accessTokenConverter()));
+
 		endpoints.tokenStore(tokenStore())
 				.tokenEnhancer(tokenEnhancerChain)
 				.authenticationManager(authenticationManager)

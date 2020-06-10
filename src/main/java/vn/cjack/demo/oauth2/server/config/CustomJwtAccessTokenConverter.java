@@ -11,6 +11,7 @@ import vn.cjack.demo.oauth2.server.repository.entity.User;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 public class CustomJwtAccessTokenConverter extends JwtAccessTokenConverter {
@@ -20,13 +21,16 @@ public class CustomJwtAccessTokenConverter extends JwtAccessTokenConverter {
 
     @Override
     public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
-        if(authentication.getOAuth2Request().getGrantType().equalsIgnoreCase("password")) {
+        if(authentication.getOAuth2Request().getGrantType() != null && authentication.getOAuth2Request().getGrantType().equalsIgnoreCase("password")) {
             final Map<String, Object> additionalInfo = new HashMap<String, Object>();
-            User user = userRepository.findByUsername(authentication.getName()).get();
-            additionalInfo.put("address", user.getAddress());
-            additionalInfo.put("organization", authentication.getName());
-            ((DefaultOAuth2AccessToken) accessToken)
-                    .setAdditionalInformation(additionalInfo);
+            Optional<User> userOpt = userRepository.findByUsername(authentication.getName());
+            if(userOpt.isPresent()){
+                User user = userOpt.get();
+                additionalInfo.put("address", user.getAddress());
+                additionalInfo.put("organization", authentication.getName());
+                ((DefaultOAuth2AccessToken) accessToken)
+                        .setAdditionalInformation(additionalInfo);
+            }
             log.info("(accessTokenConverter) {}", authentication.getPrincipal());
 
         }
